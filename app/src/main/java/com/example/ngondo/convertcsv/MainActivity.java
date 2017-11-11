@@ -1,5 +1,9 @@
 package com.example.ngondo.convertcsv;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,8 +12,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final int requestcode = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +26,37 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Testing DBController
+        DBController dbController = new DBController(getApplicationContext());
+        SQLiteDatabase db = dbController.getWritableDatabase();
+        db.beginTransaction();
+        dbController.onCreate(db);
+
+        /*
+        * Action button for uploading the csv
+        * */
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                fileIntent.setType("csv");
+
+                try{
+                    startActivityForResult(fileIntent, requestcode);
+                }catch (ActivityNotFoundException e){
+                    Toast.makeText(MainActivity.this, "No app found to open the File", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+    /*
+    * Action after the selection of the csv file, we need to inmpoirt the data to our database
+    * */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
