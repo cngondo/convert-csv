@@ -17,6 +17,9 @@ public class DBController extends SQLiteOpenHelper {
         Log.d(DB, "Database created");
     }
 
+    /*
+    * Initial call creates the database.
+    * */
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String createTableQuery = "CREATE TABLE IF NOT EXISTS "+ DBModel.TABLE
@@ -26,7 +29,7 @@ public class DBController extends SQLiteOpenHelper {
                 + DBModel.Columns.PARENTNO + " NUMBER)";
 
         sqLiteDatabase.execSQL(createTableQuery);
-        Log.d("TABLECREATION", "Table sucessfully created" + createTableQuery);
+        Log.d("TABLECREATION", "Table sucessfully created " + createTableQuery);
     }
 
     @Override

@@ -11,5 +11,4 @@ public class DBModel {
         public static final String STUDENTNAME = "name";
         public static final String PARENTNO = "parentno";
     }
-
 }

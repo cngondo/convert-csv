@@ -16,8 +16,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int requestcode = 1;
-
+//    public static final int ACTIVITY_CHOOSE_FILE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,10 +40,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                fileIntent.setType("csv");
+                fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                fileIntent.setType("text/csv");
 
                 try{
-                    startActivityForResult(fileIntent, requestcode);
+                    startActivityForResult(Intent.createChooser(fileIntent, "open csv"), ACTIVITY_CHOOSE_FILE );
                 }catch (ActivityNotFoundException e){
                     Toast.makeText(MainActivity.this, "No app found to open the File", Toast.LENGTH_SHORT).show();
                 }
@@ -56,7 +56,13 @@ public class MainActivity extends AppCompatActivity {
     * */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+//        super.onActivityResult(requestCode, resultCode, data);
+        
+        case ACTIVITY_CHOOSE_FILE: {
+            if(resultCode == RESULT_OK){
+
+            }
+        }
     }
 
     @Override
