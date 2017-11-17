@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-//    public static final int ACTIVITY_CHOOSE_FILE;
+    public static final int ACTIVITY_CHOOSE_FILE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +57,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
-        
-        case ACTIVITY_CHOOSE_FILE: {
-            if(resultCode == RESULT_OK){
 
+        switch(requestCode) {
+            case ACTIVITY_CHOOSE_FILE: {
+                if (resultCode == RESULT_OK) {
+                    Toast.makeText(getApplicationContext(),"Intent chooser works well", Toast.LENGTH_SHORT).show();
+
+                }
             }
         }
     }
