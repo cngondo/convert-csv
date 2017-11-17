@@ -32,8 +32,10 @@ public class DBController extends SQLiteOpenHelper {
         Log.d("TABLECREATION", "Table sucessfully created " + createTableQuery);
     }
 
+    //uppgrading the DB
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DBModel.TABLE);
+        onCreate(sqLiteDatabase);
     }
 }

@@ -16,7 +16,8 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int ACTIVITY_CHOOSE_FILE = 1;
+    public static final int ACTIVITY_CHOOSE_FILE = 1; //set the intent choose to always open the file chooser dialog
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         dbController.onCreate(db);
 
         /*
-        * Action button for uploading the csv
+        * Action button for selecting and uploading the csv
         * */
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode) {
             case ACTIVITY_CHOOSE_FILE: {
                 if (resultCode == RESULT_OK) {
-                    Toast.makeText(getApplicationContext(),"Intent chooser works well", Toast.LENGTH_SHORT).show();
+                    //AsyncTask for importing the values to the sqlite db
+                   // Toast.makeText(getApplicationContext(),"Intent chooser works well", Toast.LENGTH_SHORT).show();
 
                 }
             }
