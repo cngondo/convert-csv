@@ -1,12 +1,12 @@
 package com.example.ngondo.convertcsv;
 
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -18,6 +18,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int ACTIVITY_CHOOSE_FILE = 1; //set the intent choose to always open the file chooser dialog
 
+    //DB Varianblles
+    DBController dbController;
+    SQLiteDatabase db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,11 +30,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Testing DBController
-        DBController dbController = new DBController(getApplicationContext());
-        SQLiteDatabase db = dbController.getWritableDatabase();
-        db.beginTransaction();
-        dbController.onCreate(db);
+        //Initialize the DB values in onCreate()
+        dbController = new DBController(getApplicationContext());
+        db = dbController.getWritableDatabase();
 
         /*
         * Action button for selecting and uploading the csv
@@ -91,4 +93,37 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    /*
+    * Importing the csv file to the DB using DBcontroller helper class
+    * */
+    class ImportCSV extends AsyncTask<String, String, String> {
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            this.progressDialog.setMessage("Importing CSV File. Please wait...");
+            this.progressDialog.show();
+        }
+
+        // Import the csv file using content values
+        @Override
+        protected String doInBackground(String... strings) {
+
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
+
 }
