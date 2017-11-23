@@ -1,13 +1,18 @@
 package com.example.ngondo.convertcsv;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -25,13 +30,13 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     public static final int ACTIVITY_CHOOSE_FILE = 1; //set the intent choose to always open the file chooser
+    public static final int PERMISSION_REQUEST_CODE = 1;
 
-    //DB Varianblles
+    //DB Variables
     public DBController dbController;
     public SQLiteDatabase db;
 
     public String filePath; //path to the csv file
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Check the permissions after creating the app
+        isReadStoragePermissionGranted();
+        isWriteStoragePermissionGranted();
 
         //Initialize the DB values in onCreate()
         dbController = new DBController(getApplicationContext());
@@ -64,22 +73,66 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     /*
-    *
+    * Runtime permissions for devices with Marshmallow and above
     * */
-    @Override
-    protected void onStart() {
-        super.onStart();
+    public boolean isReadStoragePermissionGranted(){
+        int requestReadPermissions = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        if(Build.VERSION.SDK_INT >= 23){
+            if(requestReadPermissions == PackageManager.PERMISSION_GRANTED){
+                Log.v("PERMISSION_GRANTED", "Permission is granted");
+                return true;
+            }else{
+                Log.v("PERMISSION_REVOKED", "Permission is Revoked");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+                return false;
+            }
+        }else{
+            Log.v("PERMISSION_GRANTED", "Permission is granted");
+            return true;
+        }
+    }
+
+    public boolean isWriteStoragePermissionGranted(){
+        int requestWritePermissions = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if(Build.VERSION.SDK_INT >= 23){
+            if((requestWritePermissions == PackageManager.PERMISSION_GRANTED)){
+                Log.v("PERMISSION_GRANTED", "Permission is granted");
+                return true;
+            }else{
+                Log.v("PERMISSION_REVOKED", "Permission is Revoked");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+                return false;
+            }
+        }else{
+            Log.v("PERMISSION_GRANTED", "Permission is granted");
+            return true;
+        }
     }
 
     /*
-        * Action after the selection of the csv file, we need to inmpoirt the data to our database
-        * */
+    * Result handshake for runtime permissions
+    * */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode){
+            case PERMISSION_REQUEST_CODE:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Log.e("PERMISSION_GRANTED", "Permission is granted");
+                } else {
+                    Log.e("PERMISSION_REVOKED", "Permission is Revoked");
+                }
+        }
+    }
+
+    /* Action after the selection of the csv file, we need to inmpoirt the data to our database
+            * */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-
         switch(requestCode) {
             case ACTIVITY_CHOOSE_FILE: {
                 filePath = data.getData().getPath();
