@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public DBController dbController;
     public SQLiteDatabase db;
 
-    public String filePath; //path to the csv file
+    public static String filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //Check the permissions after creating the app
-        isReadStoragePermissionGranted();
         isWriteStoragePermissionGranted();
 
         //Initialize the DB values in onCreate()
@@ -60,11 +59,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                isReadStoragePermissionGranted();
                 Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 fileIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 fileIntent.setType("text/csv");
-
                 try{
                     startActivityForResult(Intent.createChooser(fileIntent, "open csv"), ACTIVITY_CHOOSE_FILE );
                 }catch (ActivityNotFoundException e){
@@ -136,15 +134,12 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode) {
             case ACTIVITY_CHOOSE_FILE: {
                 filePath = data.getData().getPath();
-                db.beginTransaction();
 
+                db.beginTransaction();
                 if (resultCode == RESULT_OK) {
                     //AsyncTask for importing the values to the sqlite db
-                    try {
-                        new ImportCSV().execute("");
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
+                     new ImportCSV().execute("");
+
 //                    Toast.makeText(getApplicationContext(),"Intent chooser works well", Toast.LENGTH_SHORT).show();
                     Log.d("FILE_UPLOAD",filePath);
 
@@ -180,27 +175,33 @@ public class MainActivity extends AppCompatActivity {
     * */
     class ImportCSV extends AsyncTask<String, String, String> {
 
-        ProgressDialog progressDialog;
-        File csvFile = new File(filePath);
-        BufferedReader fileReader = new BufferedReader(new FileReader(csvFile));
-        String line = ""; //initialize empty string to read the values
-
-        ContentValues cv = new ContentValues();
+//        ProgressDialog progressDialog;
 
         //Throws this exception if the file is not found, or the wrong format is chosen
-        ImportCSV() throws FileNotFoundException {
-            Toast.makeText(getApplicationContext(), "CSV File not found. Failed to import. Try Again", Toast.LENGTH_SHORT).show();
-        }
+//        ImportCSV() throws FileNotFoundException {
+//            Toast.makeText(getApplicationContext(), "CSV File not found. Failed to import. Try Again", Toast.LENGTH_SHORT).show();
+//
+//        }
 
-        @Override
-        protected void onPreExecute() {
-            this.progressDialog.setMessage("Importing CSV File. Please wait...");
-            this.progressDialog.show();
-        }
+//        @Override
+//        protected void onPreExecute() {
+//            this.progressDialog.setMessage("Importing CSV File. Please wait...");
+//            this.progressDialog.show();
+//        }
 
         // Import the csv file using content values
         @Override
         protected String doInBackground(String... strings) {
+            File csvFile = new File(filePath);
+            BufferedReader fileReader = null;
+            try {
+                fileReader = new BufferedReader(new FileReader(csvFile));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            String line = ""; //initialize empty string to read the values
+            ContentValues cv = new ContentValues();
+
             try {
                 while((line = fileReader.readLine())!= null){
                     String[] str = line.split(",", 3); //Split the values to the three columns
@@ -224,8 +225,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 if(db.inTransaction()){
                     db.endTransaction();
-                    progressDialog.setMessage(e.getMessage().toString() + "first");
-                    progressDialog.show();
+                    Log.e("DB_ERROR", e.getMessage().toString());
                 }
             }
             return null;
