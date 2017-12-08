@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     public SQLiteDatabase db;
 
     public static String filePath;
+    public static File csvFile;
+    public static BufferedReader fileReader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     * */
     class ImportCSV extends AsyncTask<String, String, String> {
 
-//        ProgressDialog progressDialog;
+        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
 
         //Throws this exception if the file is not found, or the wrong format is chosen
 //        ImportCSV() throws FileNotFoundException {
@@ -183,50 +185,54 @@ public class MainActivity extends AppCompatActivity {
 //
 //        }
 
-//        @Override
-//        protected void onPreExecute() {
-//            this.progressDialog.setMessage("Importing CSV File. Please wait...");
-//            this.progressDialog.show();
-//        }
+        @Override
+        protected void onPreExecute() {
+            this.progressDialog.setMessage("Importing CSV File. Please wait...");
+            this.progressDialog.show();
+        }
 
         // Import the csv file using content values
         @Override
         protected String doInBackground(String... strings) {
-            File csvFile = new File(filePath);
-            BufferedReader fileReader = null;
+            csvFile = new File(filePath);
+            fileReader = null;
             try {
                 fileReader = new BufferedReader(new FileReader(csvFile));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            String line = ""; //initialize empty string to read the values
-            ContentValues cv = new ContentValues();
 
-            try {
-                while((line = fileReader.readLine())!= null){
-                    String[] str = line.split(",", 3); //Split the values to the three columns
+                String line; //initialize empty string to read the values
+                ContentValues cv = new ContentValues();
 
-                    String admno = str[0].toString();
-                    String name = str[1].toString();
-                    String pnumber = str[2].toString();
+                try {
+                    while((line = fileReader.readLine())!= null){
+                        String[] str = line.split(",", 3); //Split the values to the three columns
+
+                        String admno = str[0].toString();
+                        String name = str[1].toString();
+                        String pnumber = str[2].toString();
 
                     /*
                     * Input the values into content Values
                     * */
-                    cv.put(DBModel.Columns.ADMNO, admno);
-                    cv.put(DBModel.Columns.STUDENTNAME, name);
-                    cv.put(DBModel.Columns.PARENTNO, pnumber);
+                        cv.put(DBModel.Columns.ADMNO, admno);
+                        cv.put(DBModel.Columns.STUDENTNAME, name);
+                        cv.put(DBModel.Columns.PARENTNO, pnumber);
 
-                    db.insert(DBModel.DBNAME, null, cv);
-                }
-                db.setTransactionSuccessful();
-                db.endTransaction();
+                        db.insert(DBModel.DBNAME, null, cv);
 
-            } catch (IOException e) {
-                if(db.inTransaction()){
+                        Log.v("IMPORT", "Imports has succeeded");
+                    }
+                    db.setTransactionSuccessful();
                     db.endTransaction();
-                    Log.e("DB_ERROR", e.getMessage().toString());
+                    db.close();
+
+                } catch (IOException e) {
+                    if(db.inTransaction()){
+                        db.endTransaction();
+                        Log.e("DB_ERROR", e.getMessage().toString());
+                    }
                 }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
             return null;
         }
@@ -239,6 +245,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            if(progressDialog.isShowing()){
+                progressDialog.dismiss();
+            }
         }
     }
 
